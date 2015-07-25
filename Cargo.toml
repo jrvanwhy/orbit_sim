@@ -5,3 +5,7 @@ authors = ["Johnathan Van Why <jrvanwhy@gmail.com>"]
 
 [dependencies]
 nalgebra = "0.2.20"
+
+[profile.release]
+opt-level = 3
+lto = true
