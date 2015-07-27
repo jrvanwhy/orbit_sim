@@ -11,8 +11,9 @@ fn calc_accel(pos: &Vec3<f64>, _vel: &Vec3<f64>) -> Vec3<f64> {
 }
 
 fn ode_step(pos: &mut Vec3<f64>, vel: &mut Vec3<f64>) {
-	const DT: f64 = 0.001;
-	
+	//const DT: f64 = 0.001;
+	const DT: f64 = 100.;
+
 	*vel = *vel + calc_accel(&pos, &vel) * DT;
 	*pos = *pos + *vel * DT;
 }
@@ -21,13 +22,22 @@ fn main() {
 	let mut pos = Vec3::new(EARTH_RADIUS + 300_000f64, 0., 0.);
 	let mut vel = Vec3::new(0., (-pos.x * calc_accel(&pos, &Vec3::new(0f64, 0., 0.)).x).sqrt(), 0.);
 
-	while pos.y >= 0. {
-		ode_step(&mut pos, &mut vel);
-	}
+	//while pos.y >= 0. {
+	//	ode_step(&mut pos, &mut vel);
+	//}
 
-	while pos.y < 0. {
-		ode_step(&mut pos, &mut vel);
-	}
+	//while pos.y < 0. {
+	//	ode_step(&mut pos, &mut vel);
+	//}
 
-	println!("Position: ({}, {}, {}).", pos.x, pos.y, pos.z);
+	loop {
+for _ in 0..1000000 {
+	ode_step(&mut pos, &mut vel);
 }
+	println!("({:8.0}, {:8.0}, {:1.0})    {:10.0}", pos.x, pos.y, pos.z, na::dot(&pos, &pos).sqrt());
+	}
+
+	//println!("Position: ({}, {}, {}).", pos.x, pos.y, pos.z);
+}
+
+// vim: smartindent
