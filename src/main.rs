@@ -1,43 +1,39 @@
 extern crate nalgebra as na;
-use na::Vec3;
+use na::Vec2;
 
-const EARTH_RADIUS: f64 = 6_371_000.;
-const EARTH_GACCEL: f64 = 9.81;
-const GRAV_K: f64 = -EARTH_GACCEL * EARTH_RADIUS * EARTH_RADIUS;
-
-fn calc_accel(pos: &Vec3<f64>, _vel: &Vec3<f64>) -> Vec3<f64> {
-	let r_sqr = na::dot(pos, pos);
-	*pos * (GRAV_K / (r_sqr*r_sqr*r_sqr).sqrt())
+struct OneBody2D {
+	pos: Vec2<f64>,
+	vel: Vec2<f64>,
+	time: f64
 }
 
-fn ode_step(pos: &mut Vec3<f64>, vel: &mut Vec3<f64>) {
-	//const DT: f64 = 0.001;
-	const DT: f64 = 100.;
+impl OneBody2D {
+	fn new(pos: &Vec2<f64>, vel: &Vec2<f64>) -> OneBody2D {
+		OneBody2D { pos: *pos, vel: *vel, time: 0. }
+	}
 
-	*vel = *vel + calc_accel(&pos, &vel) * DT;
-	*pos = *pos + *vel * DT;
+	fn calc_accel(&self) -> Vec2<f64> {
+		self.pos * (-1./na::dot(&self.pos, &self.pos))
+	}
+
+	fn get_pos(&mut self, time: f64) -> Vec2<f64> {
+		const DT: f64 = 0.001;
+
+		while self.time + DT < time {
+			self.vel = self.vel + self.calc_accel() * DT;
+			self.pos = self.pos + self.vel * DT;
+			self.time += DT;
+		}
+
+		self.pos + self.vel * (time - self.time)
+	}
 }
 
 fn main() {
-	let mut pos = Vec3::new(EARTH_RADIUS + 300_000f64, 0., 0.);
-	let mut vel = Vec3::new(0., (-pos.x * calc_accel(&pos, &Vec3::new(0f64, 0., 0.)).x).sqrt(), 0.);
+	let mut sim = OneBody2D::new(&Vec2::new(1., 0.), &Vec2::new(0., 0.5));
 
-	//while pos.y >= 0. {
-	//	ode_step(&mut pos, &mut vel);
-	//}
-
-	//while pos.y < 0. {
-	//	ode_step(&mut pos, &mut vel);
-	//}
-
-	loop {
-for _ in 0..1000000 {
-	ode_step(&mut pos, &mut vel);
-}
-	println!("({:8.0}, {:8.0}, {:1.0})    {:10.0}", pos.x, pos.y, pos.z, na::dot(&pos, &pos).sqrt());
+	for i in 0..100000 {
+		let pos = sim.get_pos((i as f64) / 100.0);
+		println!("{}, {}", pos.x, pos.y);
 	}
-
-	//println!("Position: ({}, {}, {}).", pos.x, pos.y, pos.z);
 }
-
-// vim: smartindent

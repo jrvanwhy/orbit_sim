@@ -6,6 +6,15 @@ authors = ["Johnathan Van Why <jrvanwhy@gmail.com>"]
 [dependencies]
 nalgebra = "0.2.20"
 
-[profile.release]
+[profile.dev]
 opt-level = 3
+debug = false
+
+[profile.release]
+lto = true
+
+[profile.test]
+debug = false
+
+[profile.bench]
 lto = true
