@@ -1,39 +1,28 @@
+extern crate kiss3d;
 extern crate nalgebra as na;
-use na::Vec2;
 
-struct OneBody2D {
-	pos: Vec2<f64>,
-	vel: Vec2<f64>,
-	time: f64
-}
+use na::{Vec2,Vec3};
+use kiss3d::window::Window;
 
-impl OneBody2D {
-	fn new(pos: &Vec2<f64>, vel: &Vec2<f64>) -> OneBody2D {
-		OneBody2D { pos: *pos, vel: *vel, time: 0. }
-	}
-
-	fn calc_accel(&self) -> Vec2<f64> {
-		self.pos * (-1./na::dot(&self.pos, &self.pos))
-	}
-
-	fn get_pos(&mut self, time: f64) -> Vec2<f64> {
-		const DT: f64 = 0.001;
-
-		while self.time + DT < time {
-			self.vel = self.vel + self.calc_accel() * DT;
-			self.pos = self.pos + self.vel * DT;
-			self.time += DT;
-		}
-
-		self.pos + self.vel * (time - self.time)
-	}
+fn calc_accel(pos: &Vec2<f64>) -> Vec2<f64> {
+	*pos * (-1./na::dot(pos, pos))
 }
 
 fn main() {
-	let mut sim = OneBody2D::new(&Vec2::new(1., 0.), &Vec2::new(0., 0.5));
+	let mut window = Window::new("Simulation");
+	window.set_framerate_limit(Some(60));
+	window.add_sphere(0.2);
+	let mut moon = window.add_sphere(0.1);
 
-	for i in 0..100000 {
-		let pos = sim.get_pos((i as f64) / 100.0);
-		println!("{}, {}", pos.x, pos.y);
+	let mut pos = Vec2::new(1., 0.);
+	let mut vel = Vec2::new(0., 0.5);
+
+	const DT: f64 = 0.05;
+
+	while window.render() {
+		vel = vel + calc_accel(&pos) * DT;
+		pos = pos + vel * DT;
+
+		moon.set_local_translation(Vec3::new(pos.x as f32, pos.y as f32, 0.));
 	}
 }
