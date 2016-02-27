@@ -1,0 +1,8 @@
+# Rust typically uses 4 spaces per indentation level.
+# This file makes the indentation width 4 so that it
+# looks normal on GitHub
+
+root = true
+
+[*.rs]
+indent_size = 4
